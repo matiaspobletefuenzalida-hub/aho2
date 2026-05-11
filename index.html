@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos Musicales - Semana de las Artes</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: 'Boogaloo' para títulos divertidos, 'Nunito' para lectura clara -->
+    <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome para los íconos musicales -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --erase-percent: 0%;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            /* Fondo color crema simulando papel de arte cálido */
+            background-color: #fdfbf7;
+            background-image: radial-gradient(#d4c5b9 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #334155;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .font-title {
+            font-family: 'Boogaloo', cursive;
+            letter-spacing: 1px;
+        }
+
+        /* ----- EFECTO DE PAPEL Y ARTE ----- */
+        .paper-panel {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0,0,0,0.03);
+            border: 2px solid #f1f5f9;
+        }
+
+        /* ----- LA FIGURA QUE SE BORRA ----- */
+        .drawing-board {
+            position: relative;
+            width: 100%;
+            max-width: 250px;
+            aspect-ratio: 1;
+            background: #f8fafc;
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Figura fantasma de fondo (siempre visible pero tenue) */
+        .figure-ghost {
+            position: absolute;
+            font-size: 160px;
+            color: #e2e8f0;
+            z-index: 1;
+        }
+
+        /* Figura principal que se va borrando de arriba a abajo */
+        .figure-main {
+            position: absolute;
+            font-size: 160px;
+            color: #8b5cf6; /* Color violeta artístico para los conceptos */
+            z-index: 2;
+            clip-path: inset(var(--erase-percent) 0 0 0);
+            transition: clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+        }
+
+        /* ----- NOTA ADHESIVA PARA LA PISTA ----- */
+        .sticky-note {
+            background: #fef08a; /* Amarillo post-it */
+            padding: 20px;
+            border-radius: 2px 2px 20px 2px;
+            box-shadow: 3px 5px 10px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
+            position: relative;
+        }
+        .sticky-note::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 20px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* ----- TECLADO ----- */
+        .key-btn {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-bottom-width: 5px;
+            border-radius: 10px;
+            color: #475569;
+            font-weight: 800;
+            font-size: 1.25rem;
+            transition: all 0.1s;
+        }
+
+        .key-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .key-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+            margin-top: 3px;
+        }
+
+        .key-btn.correct {
+            background-color: #22c55e; /* Verde éxito */
+            border-color: #16a34a;
+            border-bottom-width: 2px;
+            transform: translateY(3px);
+            color: #fff;
+            animation: pop 0.3s ease;
+        }
+
+        .key-btn.wrong {
+            background-color: #ef4444; /* Rojo error */
+            border-color: #dc2626;
+            border-bottom-width: 2px;
+            transform: translateY(3px);
+            color: #fff;
+            opacity: 0.6;
+        }
+
+        /* ----- LETRAS (Casillas de madera/ficha) ----- */
+        .word-letter {
+            width: 45px;
+            height: 55px;
+            background: #ffffff;
+            border: 2px solid #94a3b8;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #0f172a;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #cbd5e1;
+            margin-bottom: 5px;
+        }
+
+        @media (min-width: 768px) {
+            .word-letter {
+                width: 60px;
+                height: 70px;
+                font-size: 2.5rem;
+            }
+        }
+
+        /* ----- ANIMACIONES ----- */
+        @keyframes pop {
+            0% { transform: scale(0.8) translateY(3px); }
+            50% { transform: scale(1.1) translateY(3px); }
+            100% { transform: scale(1) translateY(3px); }
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-1deg); }
+            75% { transform: translateX(5px) rotate(1deg); }
+        }
+
+        .animate-wobble { animation: wobble 0.4s ease-in-out; }
+
+        /* ----- CONFETI ----- */
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- CABECERA CON LOGOS -->
+    <header class="w-full max-w-6xl flex flex-col md:flex-row justify-between items-center gap-6 mb-8 z-10">
+        <!-- Logo 1: Semana de la Educación Artística -->
+        <div class="h-24 md:h-32 p-2 bg-white rounded-2xl shadow-sm border border-slate-100 hover:scale-105 transition-transform flex items-center justify-center">
+            <img src="logo_header.png" alt="Semana de la Educación Artística" class="h-full object-contain">
+        </div>
+        
+        <!-- Título y Puntaje -->
+        <div class="text-center flex-1">
+            <h1 class="text-5xl md:text-6xl font-title text-slate-800 drop-shadow-sm mb-2" style="color: #6d28d9;">
+                CONCEPTOS MUSICALES
+            </h1>
+            <div class="inline-flex items-center gap-3 bg-white px-6 py-2 rounded-full border-2 border-slate-200 shadow-sm">
+                <i class="fa-solid fa-star text-yellow-400 text-xl"></i>
+                <span class="text-xl font-bold text-slate-600">PUNTAJE: <span id="score-display" class="text-violet-600 text-2xl">0</span></span>
+            </div>
+        </div>
+
+        <!-- Logo 2: Escuela Santa Eugenia -->
+        <div class="h-24 md:h-32 p-2 bg-white rounded-2xl shadow-sm border border-slate-100 hover:scale-105 transition-transform flex items-center justify-center">
+            <img src="logo2.jpg" alt="Escuela Santa Eugenia" class="h-full object-contain rounded-xl">
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DEL JUEGO -->
+    <main class="w-full max-w-5xl paper-panel p-6 md:p-10 flex flex-col lg:flex-row gap-12 items-center relative overflow-hidden">
+        
+        <!-- Elemento decorativo artístico -->
+        <div class="absolute -top-10 -left-10 text-9xl opacity-5 text-violet-500 rotate-12 pointer-events-none">
+            <i class="fa-solid fa-book-open"></i>
+        </div>
+        <div class="absolute -bottom-10 -right-10 text-9xl opacity-5 text-pink-500 -rotate-12 pointer-events-none">
+            <i class="fa-solid fa-music"></i>
+        </div>
+
+        <!-- COLUMNA IZQUIERDA: La Figura y la Pista -->
+        <div class="w-full lg:w-1/3 flex flex-col items-center gap-8 z-10">
+            
+            <!-- Lienzo donde la figura se borra -->
+            <div class="drawing-board">
+                <!-- Icono gris de fondo -->
+                <i class="fa-solid fa-book figure-ghost"></i>
+                <!-- Icono de color que se va borrando -->
+                <i class="fa-solid fa-book figure-main" id="main-figure"></i>
+                
+                <!-- Indicador de vida estilo lápiz -->
+                <div class="absolute -bottom-4 bg-white border-2 border-slate-200 rounded-full px-4 py-1 text-sm font-bold text-slate-500 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-eraser"></i> Intentos: <span id="mistakes-display">0/6</span>
+                </div>
+            </div>
+            
+            <!-- Caja de Pista (Nota Adhesiva) -->
+            <div class="sticky-note w-full max-w-[280px]">
+                <h3 class="font-title text-slate-800 text-xl mb-2 text-center"><i class="fa-solid fa-lightbulb text-orange-500 mr-2"></i> Pista del Concepto:</h3>
+                <p id="hint-display" class="text-slate-700 text-lg font-medium leading-tight text-center min-h-[4rem] flex items-center justify-center">
+                    Cargando...
+                </p>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Palabra y Teclado -->
+        <div class="w-full lg:w-2/3 flex flex-col items-center justify-center gap-10 z-10">
+            
+            <!-- Contenedor de la Palabra Secreta -->
+            <div id="word-display" class="flex flex-wrap justify-center gap-2 md:gap-3 w-full">
+                <!-- Letras dinámicas -->
+            </div>
+
+            <!-- Teclado Virtual Interactivo -->
+            <div id="keyboard" class="flex flex-wrap justify-center gap-2 max-w-2xl w-full bg-slate-50/50 p-4 md:p-6 rounded-2xl border border-slate-100">
+                <!-- Botones dinámicos -->
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- MODAL DE RESULTADOS Y APRENDIZAJE -->
+    <div id="result-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm px-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-white border-4 rounded-3xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl transform scale-90 transition-transform duration-300 relative max-h-[90vh] overflow-y-auto">
+            
+            <h2 id="modal-title" class="text-4xl md:text-5xl font-title mb-2 text-slate-800">Resultado</h2>
+            
+            <div id="modal-icon" class="text-6xl mb-4"></div>
+            
+            <p id="modal-message" class="text-xl text-slate-600 mb-2 font-bold"></p>
+            
+            <div class="mb-4">
+                <span class="text-slate-500 text-lg">El término musical era:</span>
+                <strong id="modal-word" class="block text-3xl md:text-4xl text-violet-600 tracking-widest mt-1 font-black uppercase"></strong>
+            </div>
+
+            <!-- ZONA DE APRENDIZAJE (SE LLENA DINÁMICAMENTE) -->
+            <div id="modal-lesson" class="mb-6 text-left">
+                <!-- Contenido generado por JS -->
+            </div>
+            
+            <div class="flex justify-center items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-200 mb-6">
+                <span class="text-lg text-slate-600 font-bold">Puntaje total:</span>
+                <span id="modal-score" class="text-3xl font-black text-amber-500"></span>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-violet-500 hover:bg-violet-400 text-white border-b-4 border-violet-700 hover:border-violet-600 active:border-b-0 active:translate-y-1 font-bold py-4 px-8 rounded-xl text-2xl transition-all font-title tracking-wide">
+                <i class="fa-solid fa-play mr-2"></i> SIGUIENTE TÉRMINO
+            </button>
+        </div>
+    </div>
+
+    <!-- Script de lógica -->
+    <script>
+        // 1. DICCIONARIO DE TÉRMINOS MUSICALES Y LECCIONES
+        const terminosMusicales = [
+            { 
+                word: "PENTAGRAMA", 
+                hint: "Son las cinco líneas horizontales donde se escribe la música.",
+                lesson: "El <strong>pentagrama</strong> (del griego 'penta' = cinco, y 'grama' = línea) es el lugar donde se escriben las notas musicales. Cada línea y cada espacio entre ellas representa una nota diferente."
+            },
+            { 
+                word: "ACORDE", 
+                hint: "Conjunto de tres o más notas que suenan al mismo tiempo.",
+                lesson: "Un <strong>acorde</strong> ocurre cuando tocas varias notas a la vez. Es la base de la armonía. Por ejemplo, al rasguear una guitarra, estás tocando acordes."
+            },
+            { 
+                word: "TEMPO", 
+                hint: "Es la velocidad o rapidez a la que se debe tocar una pieza musical.",
+                lesson: "El <strong>tempo</strong> (que significa 'tiempo' en italiano) es como el latido del corazón de la música. Puede ser muy lento (Lento), caminar a paso normal (Andante) o ser muy rápido y alegre (Allegro)."
+            },
+            { 
+                word: "TIMBRE", 
+                hint: "La cualidad del sonido que nos permite distinguir qué instrumento está sonando.",
+                lesson: "El <strong>timbre</strong> es el 'color' del sonido. Gracias al timbre, puedes cerrar los ojos y saber si la nota que escuchas la está tocando un piano, una flauta o una voz humana."
+            },
+            { 
+                word: "MELODIA", 
+                hint: "Sucesión de notas musicales que forman una frase reconocible (lo que sueles cantar).",
+                lesson: "La <strong>melodía</strong> es la parte de la canción que se te pega y que puedes tararear. Es una secuencia de sonidos tocados uno tras otro con un ritmo específico."
+            },
+            { 
+                word: "ARMONIA", 
+                hint: "El arte de combinar diferentes notas que suenan simultáneamente para acompañar.",
+                lesson: "La <strong>armonía</strong> es como la 'ropa' que viste a la melodía. Son las notas de fondo (acordes) que suenan al mismo tiempo y hacen que la canción se sienta triste, feliz o misteriosa."
+            },
+            { 
+                word: "RITMO", 
+                hint: "El orden y proporción de los sonidos en el tiempo. ¡Lo que te hace bailar!",
+                lesson: "El <strong>ritmo</strong> organiza los sonidos y los silencios en el tiempo. Es el patrón que te hace golpear el pie contra el suelo o mover la cabeza al escuchar una batería."
+            },
+            { 
+                word: "CRESCENDO", 
+                hint: "Significa aumentar gradualmente la intensidad o volumen del sonido.",
+                lesson: "El <strong>crescendo</strong> es un término italiano usado en partituras. Le dice a los músicos que deben empezar tocando suavemente e ir subiendo el volumen poco a poco."
+            },
+            { 
+                word: "SILENCIO", 
+                hint: "Signo que indica una pausa sin sonido. ¡También es parte de la música!",
+                lesson: "El <strong>silencio</strong> es tan importante como el sonido en la música. Sin silencios, la música sería solo ruido constante. Los silencios dan respiro y emoción a la melodía."
+            },
+            { 
+                word: "ESCALA", 
+                hint: "Sucesión de notas ordenadas de más grave a más aguda o viceversa.",
+                lesson: "Una <strong>escala musical</strong> es como una escalera de sonidos. La más famosa es Do-Re-Mi-Fa-Sol-La-Si. Los músicos practican escalas para afinar sus dedos y oídos."
+            }
+        ];
+
+        // 2. ESTADO DEL JUEGO
+        let currentWordObj = {};
+        let guessedLetters = [];
+        let mistakes = 0;
+        const maxMistakes = 6;
+        let score = 0;
+        
+        // Elementos DOM
+        const wordDisplay = document.getElementById('word-display');
+        const keyboardDisplay = document.getElementById('keyboard');
+        const hintDisplay = document.getElementById('hint-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const mistakesDisplay = document.getElementById('mistakes-display');
+        const modal = document.getElementById('result-modal');
+        const rootVars = document.documentElement.style;
+        const mainFigure = document.getElementById('main-figure');
+
+        // 3. INICIO Y REINICIO
+        function startGame() {
+            // Ocultar modal
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+
+            // Escoger palabra que no sea la misma que la anterior
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * terminosMusicales.length);
+            } while (terminosMusicales.length > 1 && terminosMusicales[randomIndex].word === currentWordObj.word);
+            
+            currentWordObj = terminosMusicales[randomIndex];
+            guessedLetters = [];
+            mistakes = 0;
+            
+            // Actualizar interfaz
+            hintDisplay.innerHTML = currentWordObj.hint;
+            scoreDisplay.textContent = score;
+            
+            updateFigure(); 
+            initKeyboard();
+            updateWordDisplay();
+        }
+
+        // 4. GENERAR TECLADO
+        function initKeyboard() {
+            keyboardDisplay.innerHTML = '';
+            const rows = [
+                "QWERTYUIOP",
+                "ASDFGHJKLÑ",
+                "ZXCVBNM"
+            ];
+            
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "flex justify-center gap-1 md:gap-2 w-full";
+                
+                for (let char of row) {
+                    const btn = document.createElement('button');
+                    btn.textContent = char;
+                    btn.className = "key-btn w-8 h-10 md:w-11 md:h-12 lg:w-12 lg:h-14 flex items-center justify-center cursor-pointer";
+                    btn.onclick = () => handleGuess(char, btn);
+                    rowDiv.appendChild(btn);
+                }
+                keyboardDisplay.appendChild(rowDiv);
+            });
+        }
+
+        // 5. MOSTRAR LA PALABRA
+        function updateWordDisplay() {
+            wordDisplay.innerHTML = '';
+            let wordComplete = true;
+
+            for (let char of currentWordObj.word) {
+                const letterBox = document.createElement('div');
+                letterBox.className = "word-letter";
+                
+                if (guessedLetters.includes(char)) {
+                    letterBox.textContent = char;
+                    letterBox.style.animation = "pop 0.3s ease forwards";
+                } else {
+                    letterBox.textContent = "";
+                    wordComplete = false;
+                }
+                wordDisplay.appendChild(letterBox);
+            }
+
+            if (wordComplete) {
+                setTimeout(() => endGame(true), 600);
+            }
+        }
+
+        // 6. MANEJO DE INTENTOS
+        function handleGuess(letter, btnElement) {
+            if (btnElement.disabled) return;
+            btnElement.disabled = true;
+
+            if (currentWordObj.word.includes(letter)) {
+                // ACIERTO
+                guessedLetters.push(letter);
+                btnElement.classList.add('correct');
+                
+                const occurrences = currentWordObj.word.split('').filter(l => l === letter).length;
+                updateScore(20 * occurrences);
+                
+                updateWordDisplay();
+            } else {
+                // FALLO
+                mistakes++;
+                btnElement.classList.add('wrong');
+                
+                // Efecto visual en la hoja de papel
+                const mainContainer = document.querySelector('main');
+                mainContainer.classList.remove('animate-wobble');
+                void mainContainer.offsetWidth; // Reflow
+                mainContainer.classList.add('animate-wobble');
+
+                updateScore(-10);
+                updateFigure();
+
+                if (mistakes >= maxMistakes) {
+                    setTimeout(() => endGame(false), 800);
+                }
+            }
+        }
+
+        // 7. LA MAGIA DE LA FIGURA QUE SE BORRA
+        function updateFigure() {
+            // Porcentaje borrado
+            const erasePercent = (mistakes / maxMistakes) * 100;
+            rootVars.setProperty('--erase-percent', `${erasePercent}%`);
+            
+            // Actualizar texto de intentos
+            mistakesDisplay.textContent = `${mistakes}/${maxMistakes}`;
+
+            // Cambiar color de la figura a medida que se "daña"
+            if (mistakes === 0) {
+                mainFigure.style.color = '#8b5cf6'; // Violeta sano
+            } else if (mistakes < 4) {
+                mainFigure.style.color = '#c084fc'; // Violeta más claro
+            } else {
+                mainFigure.style.color = '#ef4444'; // Rojo peligro
+            }
+        }
+
+        // 8. PUNTAJE
+        function updateScore(points) {
+            score += points;
+            if (score < 0) score = 0;
+            scoreDisplay.textContent = score;
+        }
+
+        // 9. FIN DEL JUEGO Y MODAL EDUCATIVO
+        function endGame(isVictory) {
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.style.opacity = '1', 50);
+
+            const title = document.getElementById('modal-title');
+            const message = document.getElementById('modal-message');
+            const icon = document.getElementById('modal-icon');
+            const word = document.getElementById('modal-word');
+            const scoreText = document.getElementById('modal-score');
+            const modalContent = document.getElementById('modal-content');
+            const lessonContainer = document.getElementById('modal-lesson');
+
+            word.textContent = currentWordObj.word;
+            modalContent.classList.remove('border-green-500', 'border-amber-500');
+
+            if (isVictory) {
+                updateScore(100); // Bono
+                title.textContent = "¡EXCELENTE!";
+                title.className = "text-4xl md:text-5xl font-title mb-2 text-green-600";
+                icon.innerHTML = '<i class="fa-solid fa-graduation-cap text-green-500"></i>';
+                message.textContent = "¡Adivinaste el concepto perfectamente!";
+                modalContent.classList.add('border-green-500');
+                
+                // Lección de refuerzo
+                lessonContainer.innerHTML = `
+                    <div class="bg-green-50 p-4 rounded-xl border border-green-200 shadow-inner">
+                        <strong class="block text-green-800 text-lg mb-1"><i class="fa-solid fa-check-circle mr-2"></i> Para recordar:</strong>
+                        <p class="text-green-900 leading-relaxed text-[15px] md:text-base">${currentWordObj.lesson}</p>
+                    </div>
+                `;
+                fireConfetti();
+            } else {
+                score = Math.max(0, Math.floor(score - 30)); // Penalización
+                title.textContent = "¡CASI LO LOGRAS!";
+                title.className = "text-4xl md:text-5xl font-title mb-2 text-amber-600";
+                icon.innerHTML = '<i class="fa-solid fa-book-open-reader text-amber-500"></i>';
+                message.textContent = "El dibujo se ha borrado, ¡pero hoy aprenderás algo nuevo!";
+                modalContent.classList.add('border-amber-500');
+                
+                // Lección educativa principal (El usuario falló y debe aprender)
+                lessonContainer.innerHTML = `
+                    <div class="bg-amber-50 p-5 rounded-xl border-2 border-amber-300 shadow-inner">
+                        <strong class="block text-amber-900 text-xl mb-2 font-title tracking-wide"><i class="fa-solid fa-lightbulb text-amber-500 mr-2"></i> ¡Momento de Aprender!</strong>
+                        <p class="text-amber-950 leading-relaxed text-base md:text-lg">${currentWordObj.lesson}</p>
+                    </div>
+                `;
+            }
+            
+            scoreText.textContent = score;
+        }
+
+        // 10. SISTEMA DE CONFETI
+        function fireConfetti() {
+            const colors = ['#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f59e0b'];
+            const confettiCount = 80;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                createConfettiPiece(colors[Math.floor(Math.random() * colors.length)]);
+            }
+        }
+
+        function createConfettiPiece(color) {
+            const piece = document.createElement('div');
+            piece.classList.add('confetti');
+            document.body.appendChild(piece);
+            
+            const startX = window.innerWidth / 2;
+            const startY = window.innerHeight / 2;
+            
+            if (Math.random() > 0.5) piece.style.borderRadius = '50%';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 25 + 10;
+            const gravity = 0.8;
+            
+            let posX = startX;
+            let posY = startY;
+            let velX = Math.cos(angle) * velocity;
+            let velY = Math.sin(angle) * velocity;
+            let rotation = Math.random() * 360;
+            let rotSpeed = Math.random() * 20 - 10;
+
+            piece.style.backgroundColor = color;
+            piece.style.top = '0';
+            piece.style.left = '0';
+
+            function update() {
+                velY += gravity;
+                posX += velX;
+                posY += velY;
+                rotation += rotSpeed;
+
+                piece.style.transform = `translate(${posX}px, ${posY}px) rotate(${rotation}deg)`;
+
+                if (posY < window.innerHeight) {
+                    requestAnimationFrame(update);
+                } else {
+                    piece.remove();
+                }
+            }
+            update();
+        }
+
+        // INICIAR EL JUEGO AL CARGAR
+        window.onload = startGame;
+
+    </script>
+</body>
+</html>
